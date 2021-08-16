@@ -1,29 +1,28 @@
+const express = require('express');
+const app = express();
+const port = 3000;
 
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
+app.get('/', (req, res) => res.send('Hello World!'));
 
-const TOKEN = process.env['TOKEN']
-const APP_ID = process.env['APP_ID']
-const GUILD_ID = process.env['GUILD_ID']
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
 
-const commands = [{
-  name: 'fight',
-  description: 'Replies with Pong!'
-}]; 
+// ================= START BOT CODE ===================
+const { Client, Intents } = require('discord.js');
+const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]});
 
-const rest = new REST({ version: '9' }).setToken(TOKEN);
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
 
-(async () => {
-  try {
-    console.log('Started refreshing application (/) commands.');
-
-    await rest.put(
-      Routes.applicationGuildCommands(APP_ID, GUILD_ID),
-      { body: commands },
-    );
-
-    console.log('Successfully reloaded application (/) commands.');
-  } catch (error) {
-    console.error(error);
+client.on('messageCreate', msg => {
+  if (!msg.content.startsWith('!')) {
+    return
   }
-})();
+  if (msg.content === '!fight') {
+    msg.reply('pong!');
+  }
+});
+// You really don't want your token here since your repl's code
+// is publically available. We'll take advantage of a Repl.it 
+// feature to hide the token we got earlier. 
+client.login(process.env.TOKEN);
